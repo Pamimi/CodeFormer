@@ -1,0 +1,18 @@
+# Mirror CodeFormer root requirements.txt; setup.py also falls back to ../requirements.txt if missing
+addict
+future
+lmdb
+numpy
+opencv-python
+Pillow
+pyyaml
+requests
+scikit-image
+scipy
+tb-nightly
+torch>=1.7.1
+torchvision
+tqdm
+yapf
+lpips
+gdown

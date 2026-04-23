@@ -122,8 +122,22 @@ def make_cuda_ext(name, module, sources, sources_cuda=None):
 
 
 def get_requirements(filename='requirements.txt'):
-    with open(os.path.join(_ROOT, filename), 'r') as f:
-        requires = [line.replace('\n', '') for line in f.readlines()]
+    """Resolve requirements.txt: basicsr/ first, then parent (CodeFormer root)."""
+    candidates = (
+        os.path.join(_ROOT, filename),
+        os.path.normpath(os.path.join(_ROOT, '..', filename)),
+    )
+    path = next((p for p in candidates if os.path.isfile(p)), None)
+    if path is None:
+        raise FileNotFoundError(
+            f'{filename!r} not found, tried: {candidates!r} '
+            '(add requirements.txt to basicsr/ or CodeFormer root, e.g. from the official CodeFormer repo)')
+    requires = []
+    with open(path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.split('#', 1)[0].replace('\n', '').strip()
+            if line:
+                requires.append(line)
     return requires
 
 
