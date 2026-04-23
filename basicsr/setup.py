@@ -9,11 +9,23 @@ import time
 from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
 from utils.misc import gpu_is_available
 
-version_file = './basicsr/version.py'
+_ROOT = os.path.dirname(os.path.abspath(__file__))
+version_file = os.path.join(_ROOT, 'version.py')
+
+
+def _readme_path():
+    """setup 常在 basicsr/ 下执行，路径相对本文件，不依赖当前工作目录。"""
+    for candidate in (
+        os.path.join(_ROOT, 'README.md'),
+        os.path.normpath(os.path.join(_ROOT, '..', 'README.md')),
+    ):
+        if os.path.isfile(candidate):
+            return candidate
+    return os.path.join(_ROOT, 'README.md')
 
 
 def readme():
-    with open('README.md', encoding='utf-8') as f:
+    with open(_readme_path(), encoding='utf-8') as f:
         content = f.read()
     return content
 
@@ -44,7 +56,8 @@ def get_git_hash():
 
 
 def get_hash():
-    if os.path.exists('.git'):
+    if os.path.exists(os.path.join(_ROOT, '.git')) or os.path.exists(
+        os.path.normpath(os.path.join(_ROOT, '..', '.git'))):
         sha = get_git_hash()[:7]
     elif os.path.exists(version_file):
         try:
@@ -66,7 +79,7 @@ __gitsha__ = '{}'
 version_info = ({})
 """
     sha = get_hash()
-    with open('./basicsr/VERSION', 'r') as f:
+    with open(os.path.join(_ROOT, 'VERSION'), 'r') as f:
         SHORT_VERSION = f.read().strip()
     VERSION_INFO = ', '.join([x if x.isdigit() else f'"{x}"' for x in SHORT_VERSION.split('.')])
 
@@ -109,7 +122,7 @@ def make_cuda_ext(name, module, sources, sources_cuda=None):
 
 
 def get_requirements(filename='requirements.txt'):
-    with open(os.path.join('.', filename), 'r') as f:
+    with open(os.path.join(_ROOT, filename), 'r') as f:
         requires = [line.replace('\n', '') for line in f.readlines()]
     return requires
 
